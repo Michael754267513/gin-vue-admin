@@ -14,6 +14,23 @@ definitions:
       modelPath:
         type: string
     type: object
+  config.Email:
+    properties:
+      emailFrom:
+        type: string
+      emailHost:
+        type: string
+      emailIsSSL:
+        type: boolean
+      emailNickname:
+        type: string
+      emailPort:
+        type: integer
+      emailSecret:
+        type: string
+      emailTo:
+        type: string
+    type: object
   config.JWT:
     properties:
       signingKey:
@@ -21,23 +38,10 @@ definitions:
     type: object
   config.LocalUpload:
     properties:
-      avatarPath:
-        type: string
       filePath:
         type: string
       local:
         type: boolean
-    type: object
-  config.Log:
-    properties:
-      file:
-        type: string
-      logFile:
-        type: boolean
-      prefix:
-        type: string
-      stdout:
-        type: string
     type: object
   config.Mysql:
     properties:
@@ -55,6 +59,27 @@ definitions:
         type: string
       path:
         type: string
+      username:
+        type: string
+    type: object
+  config.Postgresql:
+    properties:
+      config:
+        type: string
+      dbname:
+        type: string
+      logger:
+        type: boolean
+      maxIdleConns:
+        type: integer
+      maxOpenConns:
+        type: integer
+      password:
+        type: string
+      port:
+        type: string
+      preferSimpleProtocol:
+        type: boolean
       username:
         type: string
     type: object
@@ -86,17 +111,20 @@ definitions:
       casbin:
         $ref: '#/definitions/config.Casbin'
         type: object
+      email:
+        $ref: '#/definitions/config.Email'
+        type: object
       jwt:
         $ref: '#/definitions/config.JWT'
         type: object
       localUpload:
         $ref: '#/definitions/config.LocalUpload'
         type: object
-      log:
-        $ref: '#/definitions/config.Log'
-        type: object
       mysql:
         $ref: '#/definitions/config.Mysql'
+        type: object
+      postgresql:
+        $ref: '#/definitions/config.Postgresql'
         type: object
       qiniu:
         $ref: '#/definitions/config.Qiniu'
@@ -107,16 +135,37 @@ definitions:
       sqlite:
         $ref: '#/definitions/config.Sqlite'
         type: object
+      sqlserver:
+        $ref: '#/definitions/config.Sqlserver'
+        type: object
       system:
         $ref: '#/definitions/config.System'
+        type: object
+      zap:
+        $ref: '#/definitions/config.Zap'
         type: object
     type: object
   config.Sqlite:
     properties:
-      config:
-        type: string
-      logMode:
+      logger:
         type: boolean
+      maxIdleConns:
+        type: integer
+      maxOpenConns:
+        type: integer
+      path:
+        type: string
+    type: object
+  config.Sqlserver:
+    properties:
+      dbname:
+        type: string
+      logger:
+        type: boolean
+      maxIdleConns:
+        type: integer
+      maxOpenConns:
+        type: integer
       password:
         type: string
       path:
@@ -132,8 +181,31 @@ definitions:
         type: string
       env:
         type: string
+      needInitData:
+        type: boolean
       useMultipoint:
         type: boolean
+    type: object
+  config.Zap:
+    properties:
+      director:
+        type: string
+      encodeLevel:
+        type: string
+      format:
+        type: string
+      level:
+        type: string
+      linkName:
+        type: string
+      logInConsole:
+        type: boolean
+      prefix:
+        type: string
+      showLine:
+        type: boolean
+      stacktraceKey:
+        type: string
     type: object
   model.AutoCodeStruct:
     properties:
@@ -200,6 +272,13 @@ definitions:
       fieldSearchType:
         type: string
       fieldType:
+        type: string
+    type: object
+  model.Project:
+    properties:
+      Desc:
+        type: string
+      NameID:
         type: string
     type: object
   model.SysApi:
@@ -378,7 +457,7 @@ definitions:
       isEnd:
         description: 是否是完结流节点
         type: boolean
-      isStrat:
+      isStart:
         description: 是否是开始流节点
         type: boolean
       stepAuthorityID:
@@ -453,6 +532,17 @@ definitions:
     type: object
   request.PageInfo:
     properties:
+      page:
+        type: integer
+      pageSize:
+        type: integer
+    type: object
+  request.ProjectSearch:
+    properties:
+      Desc:
+        type: string
+      NameID:
+        type: string
       page:
         type: integer
       pageSize:
@@ -1096,6 +1186,20 @@ paths:
       summary: 获取权限客户列表
       tags:
       - SysApi
+  /email/emailTest:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"返回成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 发送测试邮件
+      tags:
+      - system
   /fileUploadAndDownload/breakpointContinue:
     post:
       consumes:
@@ -1447,6 +1551,144 @@ paths:
       summary: 更新菜单
       tags:
       - menu
+  /project/createProject:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建Project
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.Project'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 创建Project
+      tags:
+      - Project
+  /project/deleteProject:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 删除Project
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.Project'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除Project
+      tags:
+      - Project
+  /project/deleteProjectByIds:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 批量删除Project
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.IdsReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除Project
+      tags:
+      - Project
+  /project/findProject:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用id查询Project
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.Project'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"查询成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用id查询Project
+      tags:
+      - Project
+  /project/getProjectList:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分页获取Project列表
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ProjectSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 分页获取Project列表
+      tags:
+      - Project
+  /project/updateProject:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新Project
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.Project'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"更新成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 更新Project
+      tags:
+      - Project
   /simpleUploader/checkFileMd5:
     get:
       parameters:
@@ -1993,6 +2235,29 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 设置用户权限
+      tags:
+      - SysUser
+  /user/setUserInfo:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 删除用户
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.SysUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"修改成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除用户
       tags:
       - SysUser
   /workflow/createWorkFlow:
