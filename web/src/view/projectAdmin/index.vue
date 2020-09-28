@@ -4,7 +4,7 @@
 
 <script>
 export default {
-    name:"project",
+    name:"projectAdmin",
 }
 </script>
 <style lang="scss">
