@@ -1,7 +1,10 @@
 <template>
   <div>
     <div class="search-term">
-      <el-form :inline="true" :model="searchInfo" class="demo-form-inline">      
+      <el-form :inline="true" :model="searchInfo" class="demo-form-inline">
+        <el-form-item label="版本控制器类型" prop="region">
+         <el-input v-model="CVSname"></el-input>
+        </el-form-item>
         <el-form-item>
           <el-button @click="onSubmit" type="primary">查询</el-button>
         </el-form-item>
@@ -164,7 +167,7 @@ export default {
       //条件搜索前端看此方法
       onSubmit() {
         this.page = 1
-        this.pageSize = 10       
+        this.pageSize = 10
         this.getTableData()
       },
       handleSelectionChange(val) {
